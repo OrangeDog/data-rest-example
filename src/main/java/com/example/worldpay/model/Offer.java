@@ -13,10 +13,14 @@ import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.Period;
+
+import static java.time.ZoneOffset.UTC;
 
 @Data
 @Entity
+//@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Offer extends ResourceSupport {
 
@@ -48,7 +52,10 @@ public class Offer extends ResourceSupport {
 
   @JsonProperty ("_expired")
   public boolean isExpired() {
-    return getCreatedAt().plus(getDuration()).isBefore(Instant.now());
+    return LocalDateTime
+        .ofInstant(getCreatedAt(), UTC)
+        .plus(getDuration())
+        .isBefore(LocalDateTime.now(UTC));
   }
 
   @JsonProperty ("_active")
@@ -56,4 +63,11 @@ public class Offer extends ResourceSupport {
     return !isCancelled() && !isExpired();
   }
 
+
+  public Offer(String description, Price price, Period duration, boolean cancelled) {
+    this.description = description;
+    this.price = price;
+    this.duration = duration;
+    this.cancelled = cancelled;
+  }
 }
